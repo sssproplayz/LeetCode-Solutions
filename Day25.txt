@@ -1,0 +1,77 @@
+class Solution {
+public:
+
+    vector<int> boyerMoore(string &s, string &pattern) {
+        vector<int> positions;
+
+        int n = s.size();
+        int m = pattern.size();
+
+        if (m > n) return positions;
+
+        // Bad character table
+        vector<int> last(256, -1);
+
+        for (int i = 0; i < m; i++) {
+            last[(unsigned char)pattern[i]] = i;
+        }
+
+        int shift = 0;
+
+        while (shift <= n - m) {
+
+            int j = m - 1;
+
+            // Compare pattern from right to left
+            while (j >= 0 &&
+                   pattern[j] == s[shift + j]) {
+                j--;
+            }
+
+            if (j < 0) {
+                // Match found
+                positions.push_back(shift);
+
+                // Move forward
+                if (shift + m < n)
+                    shift += m - last[(unsigned char)s[shift + m]];
+                else
+                    shift++;
+            }
+            else {
+                int badChar =
+                    last[(unsigned char)s[shift + j]];
+
+                shift += max(1, j - badChar);
+            }
+        }
+
+        return positions;
+    }
+
+    vector<int> beautifulIndices(string s, string a,
+                                 string b, int k) {
+
+        vector<int> A = boyerMoore(s, a);
+        vector<int> B = boyerMoore(s, b);
+
+        vector<int> ans;
+
+        int j = 0;
+
+        for (int i : A) {
+
+            // Move B pointer until B[j] >= i-k
+            while (j < B.size() && B[j] < i - k) {
+                j++;
+            }
+
+            // If current B occurrence is within [i-k, i+k]
+            if (j < B.size() && B[j] <= i + k) {
+                ans.push_back(i);
+            }
+        }
+
+        return ans;
+    }
+};
