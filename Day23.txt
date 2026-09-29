@@ -1,0 +1,29 @@
+class Solution {
+public:
+    int repeatedStringMatch(string a, string b) {
+        int n = a.size();
+        int m = b.size();
+
+        int repeats = (m + n - 1) / n;
+
+        string s = "";
+
+        for (int i = 0; i < repeats; i++) {
+            s += a;
+        }
+
+        // Check with the minimum required repetitions
+        if (s.find(b) != string::npos) {
+            return repeats;
+        }
+
+        // One extra repetition handles boundary overlap
+        s += a;
+
+        if (s.find(b) != string::npos) {
+            return repeats + 1;
+        }
+
+        return -1;
+    }
+};
