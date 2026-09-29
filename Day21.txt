@@ -1,0 +1,56 @@
+class Solution {
+public:
+    bool hasValidPath(vector<vector<char>>& grid) {
+        int m = grid.size();
+        int n = grid[0].size();
+
+        // Total path length must be even.
+        int len = m + n - 1;
+        if (len % 2 == 1)
+            return false;
+
+        // Starting with ')' is impossible.
+        if (grid[0][0] == ')')
+            return false;
+
+        // dp[i][j][balance]
+        vector<vector<vector<char>>> dp(
+            m,
+            vector<vector<char>>(
+                n,
+                vector<char>(len + 1, 0)
+            )
+        );
+
+        dp[0][0][1] = 1;
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+
+                if (i == 0 && j == 0)
+                    continue;
+
+                int change = (grid[i][j] == '(') ? 1 : -1;
+
+                for (int balance = 0; balance <= len; balance++) {
+
+                    int prevBalance = balance - change;
+
+                    if (prevBalance < 0 || prevBalance > len)
+                        continue;
+
+                    // Come from top
+                    if (i > 0 && dp[i - 1][j][prevBalance])
+                        dp[i][j][balance] = 1;
+
+                    // Come from left
+                    if (j > 0 && dp[i][j - 1][prevBalance])
+                        dp[i][j][balance] = 1;
+                }
+            }
+        }
+
+        // Must finish with balance = 0.
+        return dp[m - 1][n - 1][0];
+    }
+};
