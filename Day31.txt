@@ -1,0 +1,124 @@
+class Solution {
+public:
+    using ll = long long;
+
+    const ll MOD1 = 1000000007LL;
+    const ll MOD2 = 1000000009LL;
+    const ll BASE = 1000003LL;
+
+    vector<ll> pow1, pow2;
+
+    pair<ll, ll> getHash(
+        const vector<ll>& pref1,
+        const vector<ll>& pref2,
+        int l,
+        int r
+    ) {
+        ll h1 = (pref1[r] - pref1[l] * pow1[r - l] % MOD1 + MOD1) % MOD1;
+        ll h2 = (pref2[r] - pref2[l] * pow2[r - l] % MOD2 + MOD2) % MOD2;
+
+        return {h1, h2};
+    }
+
+    unsigned long long combine(ll a, ll b) {
+        return ((unsigned long long)a << 32) |
+               (unsigned long long)b;
+    }
+
+    bool check(int len, vector<vector<int>>& paths) {
+        if (len == 0)
+            return true;
+
+        unordered_set<unsigned long long> common;
+
+        // First path
+        {
+            int m = paths[0].size();
+
+            vector<ll> pref1(m + 1, 0);
+            vector<ll> pref2(m + 1, 0);
+
+            for (int i = 0; i < m; i++) {
+                pref1[i + 1] =
+                    (pref1[i] * BASE + paths[0][i] + 1) % MOD1;
+
+                pref2[i + 1] =
+                    (pref2[i] * BASE + paths[0][i] + 1) % MOD2;
+            }
+
+            for (int i = 0; i + len <= m; i++) {
+                auto h = getHash(pref1, pref2, i, i + len);
+                common.insert(combine(h.first, h.second));
+            }
+        }
+
+        // Other paths
+        for (int p = 1; p < paths.size(); p++) {
+            int m = paths[p].size();
+
+            vector<ll> pref1(m + 1, 0);
+            vector<ll> pref2(m + 1, 0);
+
+            for (int i = 0; i < m; i++) {
+                pref1[i + 1] =
+                    (pref1[i] * BASE + paths[p][i] + 1) % MOD1;
+
+                pref2[i + 1] =
+                    (pref2[i] * BASE + paths[p][i] + 1) % MOD2;
+            }
+
+            unordered_set<unsigned long long> current;
+
+            for (int i = 0; i + len <= m; i++) {
+                auto h = getHash(pref1, pref2, i, i + len);
+                unsigned long long key = combine(h.first, h.second);
+
+                if (common.count(key))
+                    current.insert(key);
+            }
+
+            common.swap(current);
+
+            if (common.empty())
+                return false;
+        }
+
+        return true;
+    }
+
+    int longestCommonSubpath(int n, vector<vector<int>>& paths) {
+
+        int high = paths[0].size();
+
+        for (auto& path : paths) {
+            high = min(high, (int)path.size());
+        }
+
+        // Precompute powers
+        int maxLen = high;
+
+        pow1.resize(maxLen + 1);
+        pow2.resize(maxLen + 1);
+
+        pow1[0] = 1;
+        pow2[0] = 1;
+
+        for (int i = 1; i <= maxLen; i++) {
+            pow1[i] = pow1[i - 1] * BASE % MOD1;
+            pow2[i] = pow2[i - 1] * BASE % MOD2;
+        }
+
+        int low = 0;
+
+        while (low < high) {
+            int mid = low + (high - low + 1) / 2;
+
+            if (check(mid, paths))
+                low = mid;
+            else
+                high = mid - 1;
+        }
+
+        return low;
+    }
+};
