@@ -1,0 +1,20 @@
+class Solution {
+public:
+    bool isRectangleOverlap(vector<int>& rec1, vector<int>& rec2) {
+        
+        // No overlap if rec2 is completely:
+        // 1. Above rec1
+        // 2. Below rec1
+        // 3. Right of rec1
+        // 4. Left of rec1
+        
+        if (rec2[1] >= rec1[3] ||   // rec2 above
+            rec2[3] <= rec1[1] ||   // rec2 below
+            rec2[0] >= rec1[2] ||   // rec2 right
+            rec2[2] <= rec1[0]) {   // rec2 left
+            return false;
+        }
+
+        return true;
+    }
+};
